@@ -74,6 +74,7 @@ http://localhost:8080/fruita/getAll
 - [Springboot](https://dev.to/abhi9720/a-beginners-guide-to-crud-operations-of-rest-api-in-spring-boot-mysql-5hcl)
 - [Postman](https://learning.postman.com/docs/getting-started/first-steps/sending-the-first-request/)
 - [H2](https://www.h2database.com/html/tutorial.html#connecting_using_jdbc)
+- [Hibernate](https://www.baeldung.com/spring-boot-hibernate)
 - [HTTP](https://www.restapitutorial.com/httpstatuscodes)
 
 [Back to top](#top)
