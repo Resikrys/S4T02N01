@@ -39,22 +39,6 @@ class FruitServiceImplTest {
     }
 
     @Test
-    void list() {
-    }
-
-    @Test
-    void getFruitById() {
-    }
-
-    @Test
-    void updateFruit() {
-    }
-
-    @Test
-    void deleteFruit() {
-    }
-
-    @Test
     public void testList_shouldReturnAllFruits() {
         // GIVEN: Una lista de frutas
         Fruit fruit1 = new Fruit(1,"Banana", 15);
@@ -99,5 +83,54 @@ class FruitServiceImplTest {
         Fruit foundFruit = fruitService.getFruitById(id);
         assertNull(foundFruit);
         verify(fruitRepository, times(1)).findById(id);
+    }
+
+    @Test
+    public void testUpdateFruit_shouldReturnUpdatedFruit_whenFruitExists() {
+        // GIVEN: Un ID y una fruta para actualizar
+        int id = 1;
+        Fruit existingFruit = new Fruit(1, "Banana", 10);
+        Fruit updatedFruitData = new Fruit(2, "Mango", 20);
+
+        // WHEN: El repositorio mockeado encuentra la fruta y la guarda
+        when(fruitRepository.findById(id)).thenReturn(Optional.of(existingFruit));
+        when(fruitRepository.save(any(Fruit.class))).thenReturn(updatedFruitData);
+
+        // THEN: El servicio devuelve la fruta actualizada
+        Fruit result = fruitService.updateFruit(id, updatedFruitData);
+        assertNotNull(result);
+        assertEquals("Mango", result.getName());
+        assertEquals(20, result.getQuantityKilos());
+        verify(fruitRepository, times(1)).findById(id);
+        verify(fruitRepository, times(1)).save(any(Fruit.class));
+    }
+
+    @Test
+    public void testUpdateFruit_shouldReturnNull_whenFruitDoesNotExist() {
+        // GIVEN: Un ID que no existe
+        int id = 99;
+        Fruit updatedFruitData = new Fruit(3, "Watermelon", 50);
+
+        // WHEN: El repositorio mockeado no encuentra la fruta
+        when(fruitRepository.findById(id)).thenReturn(Optional.empty());
+
+        // THEN: El servicio devuelve null
+        Fruit result = fruitService.updateFruit(id, updatedFruitData);
+        assertNull(result);
+        verify(fruitRepository, times(1)).findById(id);
+        verify(fruitRepository, never()).save(any(Fruit.class));
+    }
+
+    @Test
+    public void testDeleteFruit_shouldReturnTrue_whenFruitExists() {
+        // GIVEN: Un ID de una fruta existente
+        int id = 1;
+
+        // WHEN: El servicio elimina la fruta
+        // No es necesario mockear el retorno de deleteById, solo el comportamiento
+        fruitService.deleteFruit(id);
+
+        // THEN: Se verifica que el método de eliminación se ha llamado una vez
+        verify(fruitRepository, times(1)).deleteById(id);
     }
 }
