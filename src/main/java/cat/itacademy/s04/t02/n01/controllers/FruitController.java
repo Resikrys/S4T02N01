@@ -19,7 +19,7 @@ public class FruitController {
     private FruitService fruitService;
 
     @PostMapping
-    public ResponseEntity<Fruit> createFruit(@RequestBody Fruit fruit) {
+    public ResponseEntity<Fruit> createFruit(@Valid @RequestBody Fruit fruit) {
         Fruit newFruit = fruitService.createFruit(fruit);
         return new ResponseEntity<>(newFruit, HttpStatus.CREATED);
     }
