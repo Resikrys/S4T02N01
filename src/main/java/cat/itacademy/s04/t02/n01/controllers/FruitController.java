@@ -8,23 +8,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("fruits-rest")
 public class FruitController {
 
-    // Inyección de la capa de servicio
     @Autowired
     private FruitService fruitService;
 
-    // Método para crear una nueva fruta
     @PostMapping
     public ResponseEntity<Fruit> createFruit(@RequestBody Fruit fruit) {
         Fruit newFruit = fruitService.createFruit(fruit);
         return new ResponseEntity<>(newFruit, HttpStatus.CREATED);
     }
 
-    // Método para obtener una fruta por ID --> pathVariable ideal per trobar algo específic (id)
-    // RequestParams --> params (mètodes per filtrar, ordenar o proporcionar info opcional) --> signo ?
     @GetMapping("/{id}")
     public ResponseEntity<Fruit> getFruitById(@PathVariable int id) {
         Fruit fruit = fruitService.getFruitById(id);
@@ -32,6 +30,34 @@ public class FruitController {
             return new ResponseEntity<>(fruit, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Fruit>> getAllFruits() {
+        List<Fruit> fruits = fruitService.list();
+        return new ResponseEntity<>(fruits, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Fruit> updateFruit(@PathVariable int id, @RequestBody Fruit fruit) {
+        Fruit existingFruit = fruitService.getFruitById(id);
+        if (existingFruit != null) {
+            Fruit updatedFruit = fruitService.updateFruit(id, fruit);
+            return new ResponseEntity<>(updatedFruit, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFruit(@PathVariable int id) {
+        Fruit fruit = fruitService.getFruitById(id);
+        if (fruit != null) {
+            fruitService.deleteFruit(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
         }
     }
 
