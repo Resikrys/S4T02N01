@@ -28,11 +28,24 @@ public class FruitServiceImpl implements FruitService {
         Optional<Fruit> fruit = fruitRepository.findById(id);
         return fruit.orElse(null);
     }
+//    @Override
+//    public Optional<Fruit> getFruitById(int id) {
+//        return fruitRepository.findById(id);
+//    }
 
+//    @Override
+//    public Fruit updateFruit(int id, Fruit fruit) {
+//        fruit.setId(id);
+//        return fruitRepository.save(fruit);
+//    }
     @Override
     public Fruit updateFruit(int id, Fruit fruit) {
-        fruit.setId(id);
-        return fruitRepository.save(fruit);
+        // La logica de actualización debe verificar si la fruta existe.
+        return fruitRepository.findById(id).map(existingFruit -> {
+            existingFruit.setName(fruit.getName());
+            existingFruit.setQuantityKilos(fruit.getQuantityKilos());
+            return fruitRepository.save(existingFruit);
+        }).orElse(null);
     }
 
     @Override
