@@ -26,7 +26,7 @@ class FruitServiceImplTest {
     @Test
     public void testCreateFruit_shouldSaveAndReturnFruit() {
         // GIVEN: Un objeto Fruit
-        Fruit fruit = new Fruit(1, "Banana", 15); //id, string name, int kilos
+        Fruit fruit = new Fruit("Banana", 15); //id, string name, int kilos
 
         // WHEN: El repositorio mockeado guarda la fruta
         when(fruitRepository.save(fruit)).thenReturn(fruit);
@@ -41,8 +41,8 @@ class FruitServiceImplTest {
     @Test
     public void testList_shouldReturnAllFruits() {
         // GIVEN: Una lista de frutas
-        Fruit fruit1 = new Fruit(1,"Banana", 15);
-        Fruit fruit2 = new Fruit(2, "Watermelon", 47);
+        Fruit fruit1 = new Fruit("Banana", 15);
+        Fruit fruit2 = new Fruit("Watermelon", 47);
         List<Fruit> fruits = List.of(fruit1, fruit2);
 
         // WHEN: El repositorio mockeado devuelve la lista
@@ -59,7 +59,7 @@ class FruitServiceImplTest {
     public void testGetFruitById_shouldReturnFruitIfExists() {
         // GIVEN: Un ID y un objeto Fruit
         int id = 1;
-        Fruit fruit = new Fruit(1, "Banana", 15);
+        Fruit fruit = new Fruit("Banana", 15);
 
         // WHEN: El repositorio mockeado encuentra la fruta
         when(fruitRepository.findById(id)).thenReturn(Optional.of(fruit));
@@ -89,8 +89,8 @@ class FruitServiceImplTest {
     public void testUpdateFruit_shouldReturnUpdatedFruit_whenFruitExists() {
         // GIVEN: Un ID y una fruta para actualizar
         int id = 1;
-        Fruit existingFruit = new Fruit(1, "Banana", 10);
-        Fruit updatedFruitData = new Fruit(2, "Mango", 20);
+        Fruit existingFruit = new Fruit("Banana", 10);
+        Fruit updatedFruitData = new Fruit("Mango", 20);
 
         // WHEN: El repositorio mockeado encuentra la fruta y la guarda
         when(fruitRepository.findById(id)).thenReturn(Optional.of(existingFruit));
@@ -109,7 +109,7 @@ class FruitServiceImplTest {
     public void testUpdateFruit_shouldReturnNull_whenFruitDoesNotExist() {
         // GIVEN: Un ID que no existe
         int id = 99;
-        Fruit updatedFruitData = new Fruit(3, "Watermelon", 50);
+        Fruit updatedFruitData = new Fruit("Watermelon", 50);
 
         // WHEN: El repositorio mockeado no encuentra la fruta
         when(fruitRepository.findById(id)).thenReturn(Optional.empty());

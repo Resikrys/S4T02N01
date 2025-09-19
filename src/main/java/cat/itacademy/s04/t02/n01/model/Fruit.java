@@ -4,6 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Fruit {
@@ -11,14 +14,18 @@ public class Fruit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @NotBlank(message = "Name cannot be empty")
     private String name;
+
+    @NotNull(message = "Quantity cannot be null")
+    @Min(value = 1, message = "Quantity must be at least 1")
     private int quantityKilos;
 
     public Fruit() {
     }
 
-    public Fruit(int id, String name, int quantityKilos) {
-        this.id = id;
+    public Fruit(String name, int quantityKilos) {
         this.name = name;
         this.quantityKilos = quantityKilos;
     }
