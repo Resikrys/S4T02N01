@@ -32,16 +32,14 @@ public class FruitIntegrationTest {
 
     @Test
     void testCreateFruit_shouldReturn201Created() {
-        // GIVEN: Un objeto Fruit para crear
+
         Fruit newFruit = new Fruit("Apple", 15);
 
-        // WHEN: Se realiza la petición POST
         ResponseEntity<Fruit> response = restTemplate.postForEntity(
                 "http://localhost:" + port + "/fruits-rest", //Fruits-rest es el endpoint de la API (@RequestMapping)
                 newFruit,
                 Fruit.class);
 
-        // THEN: Se valida la respuesta 201 Created y que la fruta se ha guardado en la base de datos
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody().getName()).isEqualTo("Apple");
         assertThat(response.getBody().getId()).isGreaterThan(0);
@@ -50,17 +48,44 @@ public class FruitIntegrationTest {
 
     @Test
     void testGetAllFruits_shouldReturnListOfFruits() {
-        // GIVEN: Dos frutas en la base de datos
+
         fruitRepository.save(new Fruit("Banana", 10));
         fruitRepository.save(new Fruit("Orange", 20));
 
-        // WHEN: Se realiza la petición GET
         ResponseEntity<Fruit[]> response = restTemplate.getForEntity(
                 "http://localhost:" + port + "/fruits-rest",
                 Fruit[].class);
 
-        // THEN: Se valida la respuesta 200 OK y que la lista tiene dos elementos
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(2);
+    }
+
+    @Test
+    void testUpdateFruit_shouldReturn200Ok_whenFruitExists() {
+
+        Fruit existingFruit = fruitRepository.save(new Fruit("Cherry", 5));
+
+        Fruit updatedFruit = new Fruit("Strawberry", 12);
+
+        restTemplate.put(
+                "http://localhost:" + port + "/fruits-rest/" + existingFruit.getId(),
+                updatedFruit
+        );
+
+        Fruit fruitFromDb = fruitRepository.findById(existingFruit.getId()).orElse(null);
+        assertThat(fruitFromDb).isNotNull();
+        assertThat(fruitFromDb.getName()).isEqualTo("Strawberry");
+        assertThat(fruitFromDb.getQuantityKilos()).isEqualTo(12);
+    }
+
+    @Test
+    void testDeleteFruit_shouldReturn204NoContent_whenFruitExists() {
+
+        Fruit existingFruit = fruitRepository.save(new Fruit("Watermelon", 50));
+
+        restTemplate.delete("http://localhost:" + port + "/fruits-rest/" + existingFruit.getId());
+
+        assertThat(fruitRepository.findById(existingFruit.getId())).isEmpty();
+        assertThat(fruitRepository.count()).isEqualTo(0);
     }
 }
