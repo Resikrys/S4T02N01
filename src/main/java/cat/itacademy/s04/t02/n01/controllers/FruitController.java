@@ -30,29 +30,12 @@ public class FruitController {
         return new ResponseEntity<>(fruits, HttpStatus.OK);
     }
 
-//    @GetMapping("/{id}")
-//    public ResponseEntity<Fruit> getFruitById(@PathVariable int id) {
-//        Fruit fruit = fruitService.getFruitById(id);
-//        if (fruit == null) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//        return new ResponseEntity<>(fruit, HttpStatus.OK);
-//    }
     @GetMapping("/{id}")
     public ResponseEntity<Fruit> getFruitById(@PathVariable int id) {
         Optional<Fruit> fruit = Optional.ofNullable(fruitService.getFruitById(id));
         return fruit.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<Fruit> updateFruit(@PathVariable int id, @RequestBody Fruit fruit) {
-//        Fruit existingFruit = fruitService.getFruitById(id);
-//        if (existingFruit == null) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//        Fruit updatedFruit = fruitService.updateFruit(id, fruit);
-//        return new ResponseEntity<>(updatedFruit, HttpStatus.OK);
-//    }
     @PutMapping("/{id}")
     public ResponseEntity<Fruit> updateFruit(@PathVariable int id, @Valid @RequestBody Fruit fruit) {
         Fruit updatedFruit = fruitService.updateFruit(id, fruit);
@@ -63,15 +46,6 @@ public class FruitController {
         }
     }
 
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteFruit(@PathVariable int id) {
-//        Fruit fruit = fruitService.getFruitById(id);
-//        if (fruit == null) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//        fruitService.deleteFruit(id);
-//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//    }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFruit(@PathVariable int id) {
         fruitService.deleteFruit(id);
