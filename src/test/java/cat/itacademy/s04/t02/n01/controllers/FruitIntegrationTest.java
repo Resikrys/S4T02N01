@@ -28,7 +28,6 @@ public class FruitIntegrationTest {
 
     @AfterEach
     public void cleanup() {
-        // Limpia la base de datos después de cada test para asegurar la independencia
         fruitRepository.deleteAll();
     }
 
@@ -47,7 +46,6 @@ public class FruitIntegrationTest {
 
     @Test
     void testCreateFruit_shouldReturn400BadRequest_whenFruitIsInvalid() {
-        // La validación del controlador (@Valid) debería devolver un 400
         Fruit invalidFruit = new Fruit("", 0);
         ResponseEntity<String> response = restTemplate.postForEntity(
                 "http://localhost:" + port + "/fruits-rest",
@@ -55,6 +53,19 @@ public class FruitIntegrationTest {
                 String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void testCreateFruit_shouldReturn400BadRequest_andDetailedErrorMessage_whenFruitIsInvalid() {
+        Fruit invalidFruit = new Fruit("", 0);
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "http://localhost:" + port + "/fruits-rest",
+                invalidFruit,
+                String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).contains("Name cannot be empty");
+        assertThat(response.getBody()).contains("Quantity must be at least 1");
     }
 
     @Test
@@ -95,7 +106,6 @@ public class FruitIntegrationTest {
         Fruit existingFruit = fruitRepository.save(new Fruit("Cherry", 5));
         Fruit updatedFruit = new Fruit("Strawberry", 12);
 
-        // La entidad debe tener el ID para que el @PathVariable lo reciba correctamente
         updatedFruit.setId(existingFruit.getId());
 
         restTemplate.put(
