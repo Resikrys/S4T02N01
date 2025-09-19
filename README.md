@@ -54,19 +54,46 @@ mvn clean            # Clean the project
 mvn spring-boot:run  # execute the app
 ```
 
-### 🛠️ HTTP requests to update and consult information
+### 🛠️ HTTP requests to update and consult information (POSTMAN)
 ```bash
-http://localhost:8080/fruita/add
+URL base:
+http://localhost:8080/fruits-rest
 
-http://localhost:8080/fruita/update
+(POST):
+http://localhost:8080/fruits-rest + raw JSON:
+{
+  "name": "Pineapple",
+  "quantityKilos": 25
+}
 
-http://localhost:8080/fruita/delete/{id}
+(GET):
+http://localhost:8080/fruits-rest/{id}
+http://localhost:8080/fruits-rest/getAll
 
-http://localhost:8080/fruita/getOne/{id}
+(PUT):
+http://localhost:8080/fruits-rest/{id}
 
-http://localhost:8080/fruita/getAll
+(DELETE):
+http://localhost:8080/fruits-rest/{id}
+
 ```
+### 🛠️ HTTP requests to update and consult information (CURL)
+```bash
+(GET):
+curl http://localhost:8080/fruits-rest
+curl http://localhost:8080/fruits-rest/1
 
+(POST):
+curl -X POST http://localhost:8080/fruits-rest -H "Content-Type: application/json" -d '{"name": "Pineapple", "quantityKilos": 25}'
+
+(PUT):
+curl -X PUT http://localhost:8080/fruits-rest/1 -H "Content-Type: application/json" -d '{"name": "Strawberry", "quantityKilos": 12}'
+
+
+(DELETE):
+curl -X DELETE http://localhost:8080/fruits-rest/1
+
+```
 -----
 
 ## 📚 Additional Resources
