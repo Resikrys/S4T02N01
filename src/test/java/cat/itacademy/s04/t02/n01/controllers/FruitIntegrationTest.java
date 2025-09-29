@@ -35,7 +35,7 @@ public class FruitIntegrationTest {
     void testCreateFruit_shouldReturn201Created() {
         Fruit newFruit = new Fruit("Apple", 15);
         ResponseEntity<Fruit> response = restTemplate.postForEntity(
-                "http://localhost:" + port + "/fruits-rest",
+                "http://localhost:" + port + "/api/v1/fruits",
                 newFruit,
                 Fruit.class);
 
@@ -48,7 +48,7 @@ public class FruitIntegrationTest {
     void testCreateFruit_shouldReturn400BadRequest_whenFruitIsInvalid() {
         Fruit invalidFruit = new Fruit("", 0);
         ResponseEntity<String> response = restTemplate.postForEntity(
-                "http://localhost:" + port + "/fruits-rest",
+                "http://localhost:" + port + "/api/v1/fruits",
                 invalidFruit,
                 String.class);
 
@@ -59,7 +59,7 @@ public class FruitIntegrationTest {
     void testCreateFruit_shouldReturn400BadRequest_andDetailedErrorMessage_whenFruitIsInvalid() {
         Fruit invalidFruit = new Fruit("", 0);
         ResponseEntity<String> response = restTemplate.postForEntity(
-                "http://localhost:" + port + "/fruits-rest",
+                "http://localhost:" + port + "/api/v1/fruits",
                 invalidFruit,
                 String.class);
 
@@ -74,7 +74,7 @@ public class FruitIntegrationTest {
         fruitRepository.save(new Fruit("Orange", 20));
 
         ResponseEntity<Fruit[]> response = restTemplate.getForEntity(
-                "http://localhost:" + port + "/fruits-rest",
+                "http://localhost:" + port + "/api/v1/fruits",
                 Fruit[].class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -85,7 +85,7 @@ public class FruitIntegrationTest {
     void testGetFruitById_shouldReturn200Ok_whenFruitExists() {
         Fruit existingFruit = fruitRepository.save(new Fruit("Cherry", 5));
         ResponseEntity<Fruit> response = restTemplate.getForEntity(
-                "http://localhost:" + port + "/fruits-rest/" + existingFruit.getId(),
+                "http://localhost:" + port + "/api/v1/fruits/" + existingFruit.getId(),
                 Fruit.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -95,7 +95,7 @@ public class FruitIntegrationTest {
     @Test
     void testGetFruitById_shouldReturn404NotFound_whenFruitDoesNotExist() {
         ResponseEntity<String> response = restTemplate.getForEntity(
-                "http://localhost:" + port + "/fruits-rest/999",
+                "http://localhost:" + port + "/api/v1/fruits/999",
                 String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -109,7 +109,7 @@ public class FruitIntegrationTest {
         updatedFruit.setId(existingFruit.getId());
 
         restTemplate.put(
-                "http://localhost:" + port + "/fruits-rest/" + existingFruit.getId(),
+                "http://localhost:" + port + "/api/v1/fruits/" + existingFruit.getId(),
                 updatedFruit
         );
 
@@ -123,7 +123,7 @@ public class FruitIntegrationTest {
     void testUpdateFruit_shouldReturn404NotFound_whenFruitDoesNotExist() {
         Fruit updatedFruit = new Fruit("Strawberry", 12);
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://localhost:" + port + "/fruits-rest/999",
+                "http://localhost:" + port + "/api/v1/fruits/999",
                 org.springframework.http.HttpMethod.PUT,
                 new HttpEntity<>(updatedFruit),
                 String.class);
@@ -134,7 +134,7 @@ public class FruitIntegrationTest {
     @Test
     void testDeleteFruit_shouldReturn204NoContent_whenFruitExists() {
         Fruit existingFruit = fruitRepository.save(new Fruit("Watermelon", 50));
-        restTemplate.delete("http://localhost:" + port + "/fruits-rest/" + existingFruit.getId());
+        restTemplate.delete("http://localhost:" + port + "/api/v1/fruits/" + existingFruit.getId());
         assertThat(fruitRepository.findById(existingFruit.getId())).isEmpty();
     }
 }

@@ -37,7 +37,7 @@ public class FruitControllerTest {
 
         when(fruitService.createFruit(any(Fruit.class))).thenReturn(fruit);
 
-        mockMvc.perform(post("/fruits-rest")
+        mockMvc.perform(post("/api/v1/fruits")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(fruit)))
                 .andExpect(status().isCreated())
@@ -52,7 +52,7 @@ public class FruitControllerTest {
 
         Fruit invalidFruit = new Fruit("", 0);
 
-        mockMvc.perform(post("/fruits-rest")
+        mockMvc.perform(post("/api/v1/fruits")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidFruit)))
                 .andExpect(status().isBadRequest());
@@ -67,7 +67,7 @@ public class FruitControllerTest {
 
         when(fruitService.list()).thenReturn(fruitList);
 
-        mockMvc.perform(get("/fruits-rest"))
+        mockMvc.perform(get("/api/v1/fruits"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Apple"))
                 .andExpect(jsonPath("$[1].quantityKilos").value(15));
@@ -81,7 +81,7 @@ public class FruitControllerTest {
 
         when(fruitService.getFruitById(1)).thenReturn(fruit);
 
-        mockMvc.perform(get("/fruits-rest/1"))
+        mockMvc.perform(get("/api/v1/fruits/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Apple"));
     }
@@ -93,7 +93,7 @@ public class FruitControllerTest {
 
         when(fruitService.getFruitById(nonExistentId)).thenReturn(null);
 
-        mockMvc.perform(get("/fruits-rest/" + nonExistentId))
+        mockMvc.perform(get("/api/v1/fruits/" + nonExistentId))
                 .andExpect(status().isNotFound());
     }
 
@@ -106,7 +106,7 @@ public class FruitControllerTest {
 
         when(fruitService.updateFruit(eq(id), any(Fruit.class))).thenReturn(updatedFruit);
 
-        mockMvc.perform(put("/fruits-rest/" + id)
+        mockMvc.perform(put("/api/v1/fruits/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedFruit)))
                 .andExpect(status().isOk())
@@ -123,7 +123,7 @@ public class FruitControllerTest {
 
         when(fruitService.updateFruit(eq(nonExistentId), any(Fruit.class))).thenReturn(null);
 
-        mockMvc.perform(put("/fruits-rest/" + nonExistentId)
+        mockMvc.perform(put("/api/v1/fruits/" + nonExistentId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(fruitToUpdate)))
                 .andExpect(status().isNotFound());
@@ -133,10 +133,10 @@ public class FruitControllerTest {
 
     @Test
     void testDeleteFruit_shouldReturn204NoContent() throws Exception {
-        // WHEN: Se realiza la petición DELETE
+
         doNothing().when(fruitService).deleteFruit(1);
 
-        mockMvc.perform(delete("/fruits-rest/1"))
+        mockMvc.perform(delete("/api/v1/fruits/1"))
                 .andExpect(status().isNoContent());
 
         verify(fruitService, times(1)).deleteFruit(1);
