@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("fruits-rest")
+@RequestMapping("/api/v1/fruits")
 public class FruitController {
 
     @Autowired
