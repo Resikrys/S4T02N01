@@ -14,12 +14,7 @@ public class Fruit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    @NotBlank(message = "Name cannot be empty")
     private String name;
-
-    @NotNull(message = "Quantity cannot be null")
-    @Min(value = 1, message = "Quantity must be at least 1")
     private int quantityKilos;
 
     public Fruit() {

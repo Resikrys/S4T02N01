@@ -1,13 +1,15 @@
 package cat.itacademy.s04.t02.n01.services;
 
+import cat.itacademy.s04.t02.n01.dto.FruitRequest;
 import cat.itacademy.s04.t02.n01.model.Fruit;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FruitService {
-    Fruit createFruit(Fruit fruit);
+    Fruit createFruit(FruitRequest fruitRequest);
+    Optional<Fruit> getFruitById(Integer id);
     List<Fruit> list();
-    Fruit getFruitById(int id);
-    Fruit updateFruit(int id, Fruit fruit);
-    void deleteFruit(int id);
+    Optional<Fruit> updateFruit(Integer id, FruitRequest fruitRequest);
+    void deleteFruit(Integer id);
 }
