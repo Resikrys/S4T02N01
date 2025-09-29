@@ -16,7 +16,11 @@ import java.util.Optional;
 public class FruitController {
 
     @Autowired
-    private FruitService fruitService;
+    private final FruitService fruitService;
+
+    public FruitController(FruitService fruitService) {
+        this.fruitService = fruitService;
+    }
 
     @PostMapping
     public ResponseEntity<Fruit> createFruit(@Valid @RequestBody Fruit fruit) {
