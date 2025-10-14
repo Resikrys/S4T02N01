@@ -10,7 +10,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 public class FruitRequest {
 
     @NotBlank(message = "Name cannot be empty")

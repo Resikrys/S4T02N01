@@ -28,5 +28,5 @@ public class Fruit {
     @Column(name = "quantity_kilos", nullable = false)
     @NotNull(message = "Quantity must not be null")
     @Min(value = 0, message = "Quantity must be >= 0")
-    private int quantityKilos;
+    private Integer quantityKilos;
 }

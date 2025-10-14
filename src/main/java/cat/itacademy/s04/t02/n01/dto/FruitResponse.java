@@ -12,6 +12,6 @@ public class FruitResponse {
 
     private Long id;
     private String name;
-    private int quantityKilos;
+    private Integer quantityKilos;
 
 }
