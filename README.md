@@ -9,7 +9,7 @@
 -----
 
 ## Summary
-In this task you will do a CRUD (Create, Read, Update, Delete) 
+In this task you will do a **CRUD** (Create, Read, Update, Delete) 
 with 3 different databases.
 
 You will learn how to correctly use HTTP verbs and how 
@@ -48,52 +48,67 @@ properties:
 -----
 
 ### 🛠️ SCRIPTS
+The following commands can be copied and executed directly in the 
+project's root directory.
+
+#### Compile Project
 ```bash
-mvn compile          # Compile project
-mvn package          # Package in .jar
-mvn clean            # Clean the project
-mvn spring-boot:run  # execute the app
+mvn compile
 ```
-
-### 🛠️ HTTP requests to update and consult information (POSTMAN)
+#### Package to .jar
 ```bash
-URL base:
-http://localhost:8080/fruits-rest
-
-(POST):
-http://localhost:8080/fruits-rest + raw JSON:
-{
-  "name": "Pineapple",
-  "quantityKilos": 25
-}
-
-(GET):
-http://localhost:8080/fruits-rest/{id}
-http://localhost:8080/fruits-rest/getAll
-
-(PUT):
-http://localhost:8080/fruits-rest/{id}
-
-(DELETE):
-http://localhost:8080/fruits-rest/{id}
-
+mvn package
 ```
-### 🛠️ HTTP requests to update and consult information (CURL)
+#### Clean Project
 ```bash
-(GET):
-curl http://localhost:8080/fruits-rest
-curl http://localhost:8080/fruits-rest/1
+mvn clean
+```
+#### Execute the Application
+```bash
+mvn spring-boot:run
+```
+---
 
-(POST):
-curl -X POST http://localhost:8080/fruits-rest -H "Content-Type: application/json" -d '{"name": "Pineapple", "quantityKilos": 25}'
+### 🍎 API ENDPOINTS REFERENCE
+The base URL for the API is http://localhost:8080/api/v1/fruits
 
-(PUT):
-curl -X PUT http://localhost:8080/fruits-rest/1 -H "Content-Type: application/json" -d '{"name": "Strawberry", "quantityKilos": 12}'
+| Operation | HTTP Method | Endpoint | Description | Status Codes |
+|------------|--------------|-----------|--------------|---------------|
+| **Create** | POST | `/api/v1/fruits` | Creates a new fruit. | `201 Created`, `400 Bad Request` |
+| **Read One** | GET | `/api/v1/fruits/{id}` | Retrieves a single fruit by ID. | `200 OK`, `404 Not Found` |
+| **Read All** | GET | `/api/v1/fruits` | Retrieves a paginated list of all fruits. | `200 OK` |
+| **Update** | PUT | `/api/v1/fruits/{id}` | Updates an existing fruit. | `200 OK`, `404 Not Found` |
+| **Delete** | DELETE | `/api/v1/fruits/{id}` | Deletes a fruit by ID. | `204 No Content`, `404 Not Found` |
+---
 
-
-(DELETE):
-curl -X DELETE http://localhost:8080/fruits-rest/1
-
+### 🛠️  HTTP Requests (cURL Examples)
+#### CREATE Fruit (POST)
+```bash
+curl -X POST http://localhost:8080/api/v1/fruits \
+-H "Content-Type: application/json" \
+-d '{"name": "Pineapple", "quantityKilos": 25}'
+```
+#### READ All Fruits (GET)
+```bash
+# Retrieve the first page of fruits (default size: 20)
+curl http://localhost:8080/api/v1/fruits
+```
+#### READ One Fruit (GET)
+```bash
+# Replace {id} with an actual Fruit ID (e.g., 1)
+curl http://localhost:8080/api/v1/fruits/1
+```
+#### UPDATE Fruit (PUT)
+```bash
+# Replace {id} with an actual Fruit ID (e.g., 1)
+curl -X PUT http://localhost:8080/api/v1/fruits/1 \
+-H "Content-Type: application/json" \
+-d '{"name": "Strawberry", "quantityKilos": 12}'
+```
+#### DELETE Fruit (DELETE)
+```bash
+# Replace {id} with an actual Fruit ID (e.g., 1)
+curl -X DELETE http://localhost:8080/api/v1/fruits/1
 ```
 -----
 
