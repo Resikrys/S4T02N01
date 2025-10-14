@@ -1,19 +1,24 @@
 package cat.itacademy.s04.t02.n01.controllers;
 
-import cat.itacademy.s04.t02.n01.model.Fruit;
+import cat.itacademy.s04.t02.n01.dto.FruitRequest;
+import cat.itacademy.s04.t02.n01.dto.FruitResponse;
+import cat.itacademy.s04.t02.n01.exception.ResourceNotFoundException;
 import cat.itacademy.s04.t02.n01.services.FruitService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,115 +35,133 @@ public class FruitControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    // Datos de prueba comunes
+    private final FruitRequest validRequest = new FruitRequest("Apple", 20);
+    private final FruitResponse createdResponse = new FruitResponse(1L, "Apple", 20);
+
     @Test
     void testCreateFruit_shouldReturn201Created_whenFruitIsValid() throws Exception {
-
-        Fruit fruit = new Fruit("Apple", 20);
-
-        when(fruitService.createFruit(any(Fruit.class))).thenReturn(fruit);
+        // 💡 Uso de DTOs en lugar de la entidad Fruit
+        when(fruitService.createFruit(any(FruitRequest.class))).thenReturn(createdResponse);
 
         mockMvc.perform(post("/api/v1/fruits")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(fruit)))
+                        .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isCreated())
+                .andExpect(header().exists("Location")) // 💡 Verifica el header Location (REST standard)
+                .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Apple"))
                 .andExpect(jsonPath("$.quantityKilos").value(20));
 
-        verify(fruitService, times(1)).createFruit(any(Fruit.class));
+        verify(fruitService, times(1)).createFruit(any(FruitRequest.class));
     }
 
     @Test
     void testCreateFruit_shouldReturn400BadRequest_whenFruitIsInvalid() throws Exception {
-
-        Fruit invalidFruit = new Fruit("", 0);
+        // 💡 El request falla la validación @Min(1)
+        FruitRequest invalidRequest = new FruitRequest("", 0);
 
         mockMvc.perform(post("/api/v1/fruits")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidFruit)))
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(fruitService, never()).createFruit(any(Fruit.class));
+        // 💡 El servicio no debe ser llamado si falla la validación
+        verify(fruitService, never()).createFruit(any(FruitRequest.class));
     }
 
     @Test
     void testGetAllFruits_shouldReturn200Ok_whenListIsNotEmpty() throws Exception {
+        // 💡 Adaptado a la paginación y DTOs
+        FruitResponse res1 = new FruitResponse(1L, "Apple", 10);
+        FruitResponse res2 = new FruitResponse(2L, "Banana", 15);
+        List<FruitResponse> content = List.of(res1, res2);
+        PageImpl<FruitResponse> fruitPage = new PageImpl<>(content);
 
-        List<Fruit> fruitList = Arrays.asList(new Fruit("Apple", 10), new Fruit("Banana", 15));
+        // Uso de any(Pageable.class) para coincidir con la firma del Service
+        when(fruitService.getAllFruits(any(Pageable.class))).thenReturn(fruitPage);
 
-        when(fruitService.list()).thenReturn(fruitList);
-
+        // Se usa la ruta base /api/v1/fruits y se espera la estructura de Page
         mockMvc.perform(get("/api/v1/fruits"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Apple"))
-                .andExpect(jsonPath("$[1].quantityKilos").value(15));
+                .andExpect(jsonPath("$.content[0].name").value("Apple"))
+                .andExpect(jsonPath("$.content[1].quantityKilos").value(15));
+
+        verify(fruitService, times(1)).getAllFruits(any(Pageable.class));
     }
 
     @Test
     void testGetFruitById_shouldReturn200Ok_whenFruitExists() throws Exception {
+        Long id = 1L;
+        FruitResponse response = new FruitResponse(id, "Apple", 10);
 
-        Fruit fruit = new Fruit("Apple", 10);
-        fruit.setId(1);
+        // 💡 Uso de Long para el ID y DTO de respuesta
+        when(fruitService.getFruitById(id)).thenReturn(response);
 
-        when(fruitService.getFruitById(1)).thenReturn(fruit);
-
-        mockMvc.perform(get("/api/v1/fruits/1"))
+        mockMvc.perform(get("/api/v1/fruits/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Apple"));
+
+        verify(fruitService, times(1)).getFruitById(id);
     }
 
     @Test
     void testGetFruitById_shouldReturn404NotFound_whenFruitDoesNotExist() throws Exception {
+        Long nonExistentId = 99L;
 
-        int nonExistentId = 99;
+        // 💡 El servicio ahora lanza ResourceNotFoundException
+        doThrow(new ResourceNotFoundException("Fruit not found")).when(fruitService).getFruitById(nonExistentId);
 
-        when(fruitService.getFruitById(nonExistentId)).thenReturn(null);
-
-        mockMvc.perform(get("/api/v1/fruits/" + nonExistentId))
+        mockMvc.perform(get("/api/v1/fruits/{id}", nonExistentId))
                 .andExpect(status().isNotFound());
+
+        verify(fruitService, times(1)).getFruitById(nonExistentId);
     }
 
     @Test
     void testUpdateFruit_shouldReturn200Ok_whenFruitExistsAndIsValid() throws Exception {
+        Long id = 1L;
+        FruitRequest updateRequest = new FruitRequest("Kiwi", 5);
+        FruitResponse updatedResponse = new FruitResponse(id, "Kiwi", 5);
 
-        int id = 1;
-        Fruit updatedFruit = new Fruit("Kiwi", 5);
-        updatedFruit.setId(id);
+        // 💡 Uso de Long, DTOs de Request y Response
+        when(fruitService.updateFruit(eq(id), any(FruitRequest.class))).thenReturn(updatedResponse);
 
-        when(fruitService.updateFruit(eq(id), any(Fruit.class))).thenReturn(updatedFruit);
-
-        mockMvc.perform(put("/api/v1/fruits/" + id)
+        mockMvc.perform(put("/api/v1/fruits/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedFruit)))
+                        .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Kiwi"));
 
-        verify(fruitService, times(1)).updateFruit(eq(id), any(Fruit.class));
+        verify(fruitService, times(1)).updateFruit(eq(id), any(FruitRequest.class));
     }
 
     @Test
     void testUpdateFruit_shouldReturn404NotFound_whenFruitDoesNotExist() throws Exception {
+        Long nonExistentId = 99L;
+        FruitRequest updateRequest = new FruitRequest("Kiwi", 5);
 
-        int nonExistentId = 99;
-        Fruit fruitToUpdate = new Fruit("Kiwi", 5);
+        // 💡 El servicio lanza ResourceNotFoundException
+        doThrow(new ResourceNotFoundException("Fruit not found")).when(fruitService).updateFruit(eq(nonExistentId), any(FruitRequest.class));
 
-        when(fruitService.updateFruit(eq(nonExistentId), any(Fruit.class))).thenReturn(null);
-
-        mockMvc.perform(put("/api/v1/fruits/" + nonExistentId)
+        mockMvc.perform(put("/api/v1/fruits/{id}", nonExistentId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(fruitToUpdate)))
+                        .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isNotFound());
 
-        verify(fruitService, times(1)).updateFruit(eq(nonExistentId), any(Fruit.class));
+        verify(fruitService, times(1)).updateFruit(eq(nonExistentId), any(FruitRequest.class));
     }
 
     @Test
     void testDeleteFruit_shouldReturn204NoContent() throws Exception {
+        Long id = 1L;
 
-        doNothing().when(fruitService).deleteFruit(1);
+        // 💡 Uso de Long
+        doNothing().when(fruitService).deleteFruit(id);
 
-        mockMvc.perform(delete("/api/v1/fruits/1"))
+        mockMvc.perform(delete("/api/v1/fruits/{id}", id))
                 .andExpect(status().isNoContent());
 
-        verify(fruitService, times(1)).deleteFruit(1);
+        verify(fruitService, times(1)).deleteFruit(id);
     }
 }

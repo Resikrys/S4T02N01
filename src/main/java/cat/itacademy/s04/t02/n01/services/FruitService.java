@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FruitService {
-    Fruit createFruit(FruitRequest request);
+    FruitResponse  createFruit(FruitRequest request);
     FruitResponse getFruitById(Long id);
     Page<FruitResponse> getAllFruits(Pageable pageable);
     FruitResponse updateFruit(Long id, FruitRequest request);
