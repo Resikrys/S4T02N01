@@ -20,7 +20,6 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// Clase DTO anidada para manejar la respuesta paginada
 class PageResponse<T> {
     private T[] content;
     public T[] getContent() { return content; }
@@ -44,17 +43,14 @@ public class FruitIntegrationTest {
         fruitRepository.deleteAll();
     }
 
-    // Método auxiliar para construir URL
     private String getBaseUrl() {
         return "http://localhost:" + port + "/api/v1/fruits";
     }
 
     @Test
     void testCreateFruit_shouldReturn201Created() {
-        // 💡 Uso de FruitRequest para enviar datos
         FruitRequest newRequest = new FruitRequest("Apple", 15);
 
-        // 💡 Esperar FruitResponse como cuerpo de la respuesta
         ResponseEntity<FruitResponse> response = restTemplate.postForEntity(
                 getBaseUrl(),
                 newRequest,
@@ -62,13 +58,12 @@ public class FruitIntegrationTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(Objects.requireNonNull(response.getBody()).getName()).isEqualTo("Apple");
-        assertThat(response.getHeaders().getLocation()).isNotNull(); // Verifica el header Location
+        assertThat(response.getHeaders().getLocation()).isNotNull();
         assertThat(fruitRepository.count()).isEqualTo(1);
     }
 
     @Test
     void testCreateFruit_shouldReturn400BadRequest_whenFruitIsInvalid() {
-        // 💡 El Request falla la validación (nombre vacío, kilos 0)
         FruitRequest invalidRequest = new FruitRequest("", 0);
 
         ResponseEntity<String> response = restTemplate.postForEntity(
@@ -88,7 +83,6 @@ public class FruitIntegrationTest {
                 String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        // El cuerpo del error contiene mensajes de validación
         assertThat(response.getBody()).contains("Name cannot be empty");
         assertThat(response.getBody()).contains("Quantity must be at least 1");
     }
@@ -98,12 +92,11 @@ public class FruitIntegrationTest {
         fruitRepository.save(Fruit.builder().name("Banana").quantityKilos(10).build());
         fruitRepository.save(Fruit.builder().name("Orange").quantityKilos(20).build());
 
-        // 💡 Adaptado a la paginación: Esperar la estructura Page<FruitResponse>
         ResponseEntity<PageResponse<FruitResponse>> response = restTemplate.exchange(
                 getBaseUrl(),
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<>() {}); // Uso de ParameterizedTypeReference
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -114,9 +107,8 @@ public class FruitIntegrationTest {
     @Test
     void testGetFruitById_shouldReturn200Ok_whenFruitExists() {
         Fruit existingFruit = fruitRepository.save(Fruit.builder().name("Cherry").quantityKilos(5).build());
-        Long id = existingFruit.getId(); // 💡 Usar Long ID
+        Long id = existingFruit.getId();
 
-        // 💡 Esperar FruitResponse
         ResponseEntity<FruitResponse> response = restTemplate.getForEntity(
                 getBaseUrl() + "/" + id,
                 FruitResponse.class);
@@ -137,12 +129,10 @@ public class FruitIntegrationTest {
     @Test
     void testUpdateFruit_shouldReturn200Ok_whenFruitExists() {
         Fruit existingFruit = fruitRepository.save(Fruit.builder().name("Cherry").quantityKilos(5).build());
-        Long id = existingFruit.getId(); // 💡 Usar Long ID
+        Long id = existingFruit.getId();
 
-        // 💡 Uso de FruitRequest para enviar datos actualizados
         FruitRequest updatedRequest = new FruitRequest("Strawberry", 12);
 
-        // Usa exchange para obtener la respuesta del PUT (el put de restTemplate no devuelve ResponseEntity)
         ResponseEntity<FruitResponse> response = restTemplate.exchange(
                 getBaseUrl() + "/" + id,
                 HttpMethod.PUT,
@@ -172,14 +162,13 @@ public class FruitIntegrationTest {
 
     @Test
     void testDeleteFruit_shouldReturn204NoContent_whenFruitExists() {
-        // ✅ CORRECCIÓN: Uso correcto del builder
         Fruit existingFruit = fruitRepository.save(
                 Fruit.builder()
                         .name("Watermelon")
                         .quantityKilos(50)
                         .build()
         );
-        Long id = existingFruit.getId(); // Usar Long ID
+        Long id = existingFruit.getId();
 
         restTemplate.delete(getBaseUrl() + "/" + id);
 

@@ -6,7 +6,6 @@ import cat.itacademy.s04.t02.n01.exception.ResourceNotFoundException;
 import cat.itacademy.s04.t02.n01.exception.ResourceAlreadyExistsException;
 import cat.itacademy.s04.t02.n01.model.Fruit;
 import cat.itacademy.s04.t02.n01.repository.FruitRepository;
-//import jakarta.validation.Valid;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,19 +19,6 @@ public class FruitServiceImpl implements FruitService {
     public FruitServiceImpl(FruitRepository repository ) {
         this.repository  = repository ;
     }
-
-//    private Fruit toEntity(FruitRequest request) {
-//        Fruit fruit = new Fruit();
-//        fruit.setName(request.getName());
-//        fruit.setQuantityKilos(request.getQuantityKilos());
-//        return fruit;
-//    }
-//
-//    private Fruit updateEntity(Fruit existingFruit, FruitRequest request) {
-//        existingFruit.setName(request.getName());
-//        existingFruit.setQuantityKilos(request.getQuantityKilos());
-//        return existingFruit;
-//    }
 
     public FruitResponse createFruit(FruitRequest request) {
         repository.findByName(request.getName())
@@ -76,7 +62,6 @@ public class FruitServiceImpl implements FruitService {
         repository.delete(existing);
     }
 
-    // 🔁 Conversión entre entidad y DTO
     private FruitResponse toResponse(Fruit fruit) {
         return FruitResponse.builder()
                 .id(fruit.getId())

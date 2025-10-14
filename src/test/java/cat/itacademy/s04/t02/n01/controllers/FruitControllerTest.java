@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -35,20 +34,18 @@ public class FruitControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // Datos de prueba comunes
     private final FruitRequest validRequest = new FruitRequest("Apple", 20);
     private final FruitResponse createdResponse = new FruitResponse(1L, "Apple", 20);
 
     @Test
     void testCreateFruit_shouldReturn201Created_whenFruitIsValid() throws Exception {
-        // 💡 Uso de DTOs en lugar de la entidad Fruit
         when(fruitService.createFruit(any(FruitRequest.class))).thenReturn(createdResponse);
 
         mockMvc.perform(post("/api/v1/fruits")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(header().exists("Location")) // 💡 Verifica el header Location (REST standard)
+                .andExpect(header().exists("Location"))
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Apple"))
                 .andExpect(jsonPath("$.quantityKilos").value(20));
@@ -58,7 +55,6 @@ public class FruitControllerTest {
 
     @Test
     void testCreateFruit_shouldReturn400BadRequest_whenFruitIsInvalid() throws Exception {
-        // 💡 El request falla la validación @Min(1)
         FruitRequest invalidRequest = new FruitRequest("", 0);
 
         mockMvc.perform(post("/api/v1/fruits")
@@ -66,22 +62,18 @@ public class FruitControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
 
-        // 💡 El servicio no debe ser llamado si falla la validación
         verify(fruitService, never()).createFruit(any(FruitRequest.class));
     }
 
     @Test
     void testGetAllFruits_shouldReturn200Ok_whenListIsNotEmpty() throws Exception {
-        // 💡 Adaptado a la paginación y DTOs
         FruitResponse res1 = new FruitResponse(1L, "Apple", 10);
         FruitResponse res2 = new FruitResponse(2L, "Banana", 15);
         List<FruitResponse> content = List.of(res1, res2);
         PageImpl<FruitResponse> fruitPage = new PageImpl<>(content);
 
-        // Uso de any(Pageable.class) para coincidir con la firma del Service
         when(fruitService.getAllFruits(any(Pageable.class))).thenReturn(fruitPage);
 
-        // Se usa la ruta base /api/v1/fruits y se espera la estructura de Page
         mockMvc.perform(get("/api/v1/fruits"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].name").value("Apple"))
@@ -95,7 +87,6 @@ public class FruitControllerTest {
         Long id = 1L;
         FruitResponse response = new FruitResponse(id, "Apple", 10);
 
-        // 💡 Uso de Long para el ID y DTO de respuesta
         when(fruitService.getFruitById(id)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/fruits/{id}", id))
@@ -109,7 +100,6 @@ public class FruitControllerTest {
     void testGetFruitById_shouldReturn404NotFound_whenFruitDoesNotExist() throws Exception {
         Long nonExistentId = 99L;
 
-        // 💡 El servicio ahora lanza ResourceNotFoundException
         doThrow(new ResourceNotFoundException("Fruit not found")).when(fruitService).getFruitById(nonExistentId);
 
         mockMvc.perform(get("/api/v1/fruits/{id}", nonExistentId))
@@ -124,7 +114,6 @@ public class FruitControllerTest {
         FruitRequest updateRequest = new FruitRequest("Kiwi", 5);
         FruitResponse updatedResponse = new FruitResponse(id, "Kiwi", 5);
 
-        // 💡 Uso de Long, DTOs de Request y Response
         when(fruitService.updateFruit(eq(id), any(FruitRequest.class))).thenReturn(updatedResponse);
 
         mockMvc.perform(put("/api/v1/fruits/{id}", id)
@@ -141,7 +130,6 @@ public class FruitControllerTest {
         Long nonExistentId = 99L;
         FruitRequest updateRequest = new FruitRequest("Kiwi", 5);
 
-        // 💡 El servicio lanza ResourceNotFoundException
         doThrow(new ResourceNotFoundException("Fruit not found")).when(fruitService).updateFruit(eq(nonExistentId), any(FruitRequest.class));
 
         mockMvc.perform(put("/api/v1/fruits/{id}", nonExistentId)
@@ -156,7 +144,6 @@ public class FruitControllerTest {
     void testDeleteFruit_shouldReturn204NoContent() throws Exception {
         Long id = 1L;
 
-        // 💡 Uso de Long
         doNothing().when(fruitService).deleteFruit(id);
 
         mockMvc.perform(delete("/api/v1/fruits/{id}", id))

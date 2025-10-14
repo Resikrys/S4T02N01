@@ -30,21 +30,17 @@ class FruitServiceImplTest {
     @InjectMocks
     private FruitServiceImpl fruitService;
 
-    // DTO de prueba
     private final FruitRequest validRequest = FruitRequest.builder().name("Banana").quantityKilos(15).build();
 
-    // Entidad de prueba
     private Fruit createFruitEntity(Long id, String name, Integer kilos) {
         return Fruit.builder().id(id).name(name).quantityKilos(kilos).build();
     }
 
     @Test
     public void testCreateFruit_shouldSaveAndReturnFruitResponse() {
-        // 💡 Uso de FruitRequest en la entrada y FruitResponse en la salida
         Fruit fruitToSave = createFruitEntity(null, "Banana", 15);
         Fruit savedFruit = createFruitEntity(1L, "Banana", 15);
 
-        // Cuando se guarda cualquier entidad Fruit que coincida, devuelve la entidad 'savedFruit'
         when(fruitRepository.save(any(Fruit.class))).thenReturn(savedFruit);
 
         FruitResponse createdResponse = fruitService.createFruit(validRequest);
@@ -52,30 +48,24 @@ class FruitServiceImplTest {
         assertEquals(1L, createdResponse.getId());
         assertEquals("Banana", createdResponse.getName());
 
-        // Verifica que se llamó a save con una instancia de Fruit
         verify(fruitRepository, times(1)).save(any(Fruit.class));
     }
 
     @Test
     public void testCreateFruit_shouldThrowException_whenFruitNameAlreadyExists() {
-        // 1. Datos de prueba
         Fruit existingFruit = createFruitEntity(1L, "Banana", 10);
 
-        // 2. Configurar Mock: Cuando se busque por nombre, devolver la fruta existente
         when(fruitRepository.findByName(validRequest.getName())).thenReturn(Optional.of(existingFruit));
 
-        // 3. ✅ Verificar que se lanza la excepción ResourceAlreadyExistsException
         assertThrows(ResourceAlreadyExistsException.class,
                 () -> fruitService.createFruit(validRequest));
 
-        // 4. Verificar que NO se intentó guardar la fruta
         verify(fruitRepository, times(1)).findByName(validRequest.getName());
         verify(fruitRepository, never()).save(any(Fruit.class));
     }
 
     @Test
     public void testGetAllFruits_shouldReturnPageOfFruitResponse() {
-        // 💡 Adaptado a la paginación y DTOs
         Fruit fruit1 = createFruitEntity(1L, "Banana", 15);
         Fruit fruit2 = createFruitEntity(2L, "Watermelon", 47);
         List<Fruit> fruits = List.of(fruit1, fruit2);
@@ -90,7 +80,6 @@ class FruitServiceImplTest {
         assertEquals(2, foundResponses.getTotalElements());
         assertEquals("Banana", foundResponses.getContent().get(0).getName());
 
-        // Verifica que se llamó a findAll con Pageable
         verify(fruitRepository, times(1)).findAll(pageable);
     }
 
@@ -99,7 +88,6 @@ class FruitServiceImplTest {
         Long id = 1L;
         Fruit fruit = createFruitEntity(id, "Banana", 15);
 
-        // 💡 Uso de Long y FruitResponse en la salida.
         when(fruitRepository.findById(id)).thenReturn(Optional.of(fruit));
 
         FruitResponse foundResponse = fruitService.getFruitById(id);
@@ -112,7 +100,6 @@ class FruitServiceImplTest {
     public void testGetFruitById_shouldThrowResourceNotFoundIfNotFound() {
         Long id = 99L;
 
-        // 💡 Ahora lanza ResourceNotFoundException
         when(fruitRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> fruitService.getFruitById(id));
@@ -124,7 +111,7 @@ class FruitServiceImplTest {
         Long id = 1L;
         Fruit existingFruit = createFruitEntity(id, "Banana", 10);
         FruitRequest updateRequest = FruitRequest.builder().name("Mango").quantityKilos(20).build();
-        Fruit updatedFruit = createFruitEntity(id, "Mango", 20); // Entidad que simula el resultado del save
+        Fruit updatedFruit = createFruitEntity(id, "Mango", 20);
 
         when(fruitRepository.findById(id)).thenReturn(Optional.of(existingFruit));
         when(fruitRepository.save(any(Fruit.class))).thenReturn(updatedFruit);
@@ -134,7 +121,6 @@ class FruitServiceImplTest {
         assertEquals("Mango", result.getName());
         assertEquals(20, result.getQuantityKilos());
 
-        // Verifica que la entidad existente fue modificada y guardada
         verify(fruitRepository, times(1)).findById(id);
         verify(fruitRepository, times(1)).save(any(Fruit.class));
     }
@@ -144,7 +130,6 @@ class FruitServiceImplTest {
         Long id = 99L;
         FruitRequest updateRequest = FruitRequest.builder().name("Watermelon").quantityKilos(50).build();
 
-        // 💡 Ahora lanza ResourceNotFoundException
         when(fruitRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> fruitService.updateFruit(id, updateRequest));
@@ -157,7 +142,6 @@ class FruitServiceImplTest {
         Long id = 1L;
         Fruit existingFruit = createFruitEntity(id, "Watermelon", 50);
 
-        // 💡 Uso de Long y doNothing() con la entidad
         when(fruitRepository.findById(id)).thenReturn(Optional.of(existingFruit));
         doNothing().when(fruitRepository).delete(existingFruit);
 
@@ -171,7 +155,6 @@ class FruitServiceImplTest {
     public void testDeleteFruit_shouldThrowResourceNotFound_whenFruitDoesNotExist() {
         Long id = 99L;
 
-        // 💡 Ahora lanza ResourceNotFoundException
         when(fruitRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> fruitService.deleteFruit(id));
