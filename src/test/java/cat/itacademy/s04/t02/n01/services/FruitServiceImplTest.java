@@ -2,6 +2,7 @@ package cat.itacademy.s04.t02.n01.services;
 
 import cat.itacademy.s04.t02.n01.dto.FruitRequest;
 import cat.itacademy.s04.t02.n01.dto.FruitResponse;
+import cat.itacademy.s04.t02.n01.exception.ResourceAlreadyExistsException;
 import cat.itacademy.s04.t02.n01.exception.ResourceNotFoundException;
 import cat.itacademy.s04.t02.n01.model.Fruit;
 import cat.itacademy.s04.t02.n01.repository.FruitRepository;
@@ -53,6 +54,23 @@ class FruitServiceImplTest {
 
         // Verifica que se llamó a save con una instancia de Fruit
         verify(fruitRepository, times(1)).save(any(Fruit.class));
+    }
+
+    @Test
+    public void testCreateFruit_shouldThrowException_whenFruitNameAlreadyExists() {
+        // 1. Datos de prueba
+        Fruit existingFruit = createFruitEntity(1L, "Banana", 10);
+
+        // 2. Configurar Mock: Cuando se busque por nombre, devolver la fruta existente
+        when(fruitRepository.findByName(validRequest.getName())).thenReturn(Optional.of(existingFruit));
+
+        // 3. ✅ Verificar que se lanza la excepción ResourceAlreadyExistsException
+        assertThrows(ResourceAlreadyExistsException.class,
+                () -> fruitService.createFruit(validRequest));
+
+        // 4. Verificar que NO se intentó guardar la fruta
+        verify(fruitRepository, times(1)).findByName(validRequest.getName());
+        verify(fruitRepository, never()).save(any(Fruit.class));
     }
 
     @Test

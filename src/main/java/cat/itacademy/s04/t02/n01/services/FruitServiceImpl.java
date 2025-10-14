@@ -3,6 +3,7 @@ package cat.itacademy.s04.t02.n01.services;
 import cat.itacademy.s04.t02.n01.dto.FruitRequest;
 import cat.itacademy.s04.t02.n01.dto.FruitResponse;
 import cat.itacademy.s04.t02.n01.exception.ResourceNotFoundException;
+import cat.itacademy.s04.t02.n01.exception.ResourceAlreadyExistsException;
 import cat.itacademy.s04.t02.n01.model.Fruit;
 import cat.itacademy.s04.t02.n01.repository.FruitRepository;
 //import jakarta.validation.Valid;
@@ -34,6 +35,11 @@ public class FruitServiceImpl implements FruitService {
 //    }
 
     public FruitResponse createFruit(FruitRequest request) {
+        repository.findByName(request.getName())
+                .ifPresent(fruit -> {
+                    throw new ResourceAlreadyExistsException("Fruit with name " + request.getName() + " already exists.");
+                });
+
         Fruit fruit = Fruit.builder()
                 .name(request.getName())
                 .quantityKilos(request.getQuantityKilos())
